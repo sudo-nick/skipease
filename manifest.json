@@ -1,0 +1,24 @@
+{
+    "name": "Skip Ease",
+    "description": "Skips parts of a youtube video automatically.",
+    "version": "0.1",
+    "manifest_version": 3,
+	"icons": {
+		"16": "skip-ease.png",
+		"32": "skip-ease.png",
+		"48": "skip-ease.png",
+		"128": "skip-ease.png"
+	},
+	"content_scripts": [
+		{
+			"matches": ["*://*.youtube.com/*"],
+			"js": ["main.js"],
+			"run_at": "document_end"
+		}
+	],
+    "content_security_policy": {
+        "script-src": "self",
+        "object-src": "none"
+    }
+}
+
