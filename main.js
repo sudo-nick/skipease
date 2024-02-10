@@ -52,6 +52,9 @@ const parseTime = (timeStr) => {
 }
 
 const stringifyTime = (time) => {
+	if (time == 0) {
+		return "00:00";
+	}
 	let s = "";
 	let i = 1;
 	while (time) {
