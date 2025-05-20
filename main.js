@@ -216,7 +216,9 @@ const initVideoPlayer = () => {
 	}
 	video = document.querySelector("#movie_player > div.html5-video-container > video");
 	if (!video) {
-		initVideoPlayer();
+		setTimeout(() => {
+			initVideoPlayer();
+		}, 200);
 		return;
 	}
 	addVideoListener();
