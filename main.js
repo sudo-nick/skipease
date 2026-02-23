@@ -1,6 +1,14 @@
+/** @type {string} */
 const EXTENSION_NAME = "skip-ease"
+/** @type {HTMLVideoElement | undefined} */
 let video = undefined;
+/** @type {HTMLElement | undefined} */
 let UI = undefined;
+
+const PLUS_ICON = chrome.runtime.getURL("assets/plus.svg");
+const TRASH_ICON = chrome.runtime.getURL("assets/trash.svg");
+const RA_ICON = chrome.runtime.getURL("assets/right-arrow.svg");
+const SKIPEASE_ICON = chrome.runtime.getURL("assets/skip-ease.png");
 
 // schema: 
 // {"vidId": [{from: 0, to: 10}, ...]}
@@ -39,7 +47,7 @@ const removeSkipEntry = (vidId, from, to) => {
 	if (!d[vidId]) {
 		return;
 	}
-	d[vidId] = d[vidId].filter(e => e.from !== from && e.to !== to);
+	d[vidId] = d[vidId].filter(e => e.from !== from || e.to !== to);
 	saveData(d);
 }
 
@@ -84,60 +92,31 @@ const renderUI = () => {
 		return;
 	}
 	const wrapper = document.createElement("div");
-	Object.assign(wrapper.style, {
-		"display": "flex",
-		"flexWrap": "wrap",
-		"gap": "10px",
-		"align-items": "center",
-	})
+	wrapper.classList.add("skip-ease-container");
 
-	const container = document.createElement("div");
-	wrapper.appendChild(container);
-	container.id = EXTENSION_NAME + "_ui";
-	Object.assign(container.style, {
-		"display": "flex",
-		"gap": "5px",
-		"width": "fit-content",
-		"padding": "5px",
-		"margin": "10px 0px",
-		"border": "1px solid white",
-		"borderRadius": "5px",
-	})
-	const inputStyle = {
-		"width": "45px",
-		"fontSize": "12px",
-		"padding": "2px 5px",
-		"border": "1px solid white",
-		"background": "transparent",
-		"color": "white",
-		"outline": "none",
-		"borderRadius": "5px",
-	}
+	const inputContainer = document.createElement("div");
+	inputContainer.classList.add("skip-ease-input-container");
+
 	const fromTimeElement = document.createElement("input");
+	fromTimeElement.id = "skip-ease-from-input";
 	fromTimeElement.type = "text";
-	Object.assign(fromTimeElement.style, inputStyle);
-	container.appendChild(fromTimeElement);
+	inputContainer.appendChild(fromTimeElement);
+
+	const rightArrowIcon = document.createElement("img");
+	rightArrowIcon.src = RA_ICON;
+	inputContainer.appendChild(rightArrowIcon);
 
 	const toTimeElement = document.createElement("input");
+	toTimeElement.id = "skip-ease-to-input";
 	toTimeElement.type = "text";
-	Object.assign(toTimeElement.style, inputStyle);
-	container.appendChild(toTimeElement);
+	inputContainer.appendChild(toTimeElement);
 
-	const addButton = document.createElement("button");
-	addButton.innerText = "Add";
-	Object.assign(addButton.style, {
-		"display": "flex",
-		"fontSize": "12px",
-		"align-items": "center",
-		"justify-content": "center",
-		"color": "white",
-		"font-weight": "bold",
-		"background": "transparent",
-		"border": "1px solid white",
-		"borderRadius": "5px",
-		"cursor": "pointer",
-	})
-	container.appendChild(addButton);
+	const addButton = document.createElement("img");
+	addButton.classList.add("skip-ease-add-button");
+	addButton.src = PLUS_ICON;
+	inputContainer.appendChild(addButton);
+
+	wrapper.appendChild(inputContainer);
 
 	addButton.onclick = () => {
 		const videoId = getVideoId();
@@ -155,41 +134,29 @@ const renderUI = () => {
 
 	let entries = getSkipEntries(getVideoId());
 	entries.forEach((li) => {
-		const e = document.createElement("span");
-		e.innerText = `${stringifyTime(li.from)} - ${stringifyTime(li.to)}`
-		Object.assign(e.style, {
-			"display": "flex",
-			"fontSize": "12px",
-			"align-items": "center",
-			"width": "max-content",
-			"padding": "5px",
-			"color": "white",
-			"gap": "5px",
-			"align-items": "center",
-			"background": "transparent",
-			"border": "1px solid white",
-			"borderRadius": "5px",
+		const entryContainer = document.createElement("div");
+		entryContainer.classList.add("skip-ease-entry");
+
+		const timestamps = document.createElement("span");
+		timestamps.classList.add("skip-ease-entry-timestamps");
+		timestamps.innerText = `${stringifyTime(li.from)} - ${stringifyTime(li.to)}`
+		Object.assign(timestamps.style, {
 		})
-		const x = document.createElement("span");
-		x.innerText = "x";
-		x.onclick = () => {
+
+		const deleteBtn = document.createElement("div");
+		deleteBtn.classList.add("skip-ease-entry-delete");
+		deleteBtn.addEventListener("click", () => {
 			removeSkipEntry(getVideoId(), li.from, li.to);
 			renderUI();
-		}
-		Object.assign(x.style, {
-			"display": "flex",
-			"width": "20px",
-			"height": "20px",
-			"cursor": "pointer",
-			"align-items": "center",
-			"justify-content": "center",
-			"font-weight": "bold",
-			"background": "red",
-			"color": "white",
-			"borderRadius": "5px",
-		})
-		e.appendChild(x);
-		wrapper.appendChild(e);
+		});
+
+		const deleteIcon = document.createElement("img");
+		deleteIcon.src = TRASH_ICON;
+		deleteBtn.appendChild(deleteIcon);
+
+		entryContainer.appendChild(timestamps);
+		entryContainer.appendChild(deleteBtn);
+		wrapper.appendChild(entryContainer);
 	})
 
 	UI = wrapper;
@@ -207,17 +174,17 @@ const watching = () => {
 	return window.location.href.indexOf("/watch") != -1;
 }
 
-const initVideoPlayer = () => {
+const checkAndMountVideoListener = () => {
 	if (!watching()) {
 		setTimeout(() => {
-			initVideoPlayer();
+			checkAndMountVideoListener();
 		}, 1000);
 		return;
 	}
 	video = document.querySelector("#movie_player > div.html5-video-container > video");
 	if (!video) {
 		setTimeout(() => {
-			initVideoPlayer();
+			checkAndMountVideoListener();
 		}, 200);
 		return;
 	}
@@ -230,15 +197,15 @@ const addVideoListener = () => {
 		let vid = getVideoId();
 		let skipEntries = getSkipEntries(vid);
 		for (let e of skipEntries) {
-			if (currTime >= e.from && currTime <= e.to) {
-				video.currentTime = e.to;
+			if (currTime >= e.from && (currTime <= e.to || e.to < e.from)) {
+				video.currentTime = e.to + 0.001;
 				break;
 			}
 		}
 	})
 }
 
-initVideoPlayer();
+checkAndMountVideoListener();
 
 let prevURL = undefined;
 setInterval(() => {
@@ -252,6 +219,7 @@ setInterval(() => {
 	}
 }, 1000);
 
+// Register shortcut
 window.addEventListener("keydown", (e) => {
 	if (e.key === "S" && e.altKey && e.shiftKey) {
 		if (UI) {
@@ -261,3 +229,31 @@ window.addEventListener("keydown", (e) => {
 		}
 	}
 })
+
+const showUIButton = document.createElement("button");
+showUIButton.classList.add("ytp-button")
+showUIButton.classList.add("skip-ease-show-ui-button");
+
+const icon = document.createElement("img");
+icon.src = SKIPEASE_ICON;
+
+showUIButton.appendChild(icon);
+showUIButton.addEventListener("click", () => {
+	if (UI) {
+		removeUI();
+	} else {
+		renderUI();
+	}
+})
+
+function mountShowUIButton() {
+	const controlsContainer = document.querySelector("#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-right-controls > div.ytp-right-controls-left");
+	if (controlsContainer) {
+		controlsContainer.prepend(showUIButton);
+		return
+	}
+	setTimeout(mountShowUIButton, 1000);
+}
+
+// Mount Show UI control button
+mountShowUIButton();

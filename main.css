@@ -1,0 +1,97 @@
+.skip-ease-show-ui-button {
+	background: transparent;
+	display: flex !important;
+	justify-content: center;
+	align-items: center;
+}
+
+.skip-ease-show-ui-button > img {
+	height: 70%;
+	width: auto;
+}
+
+ .skip-ease-container, .skip-ease-container * {
+	box-sizing: border-box;
+}
+
+.skip-ease-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+}
+
+.skip-ease-input-container {
+	display: flex;
+	gap: 5px;
+	width: fit-content;
+	height: 30px;
+	margin: 10px 0px;
+	overflow: hidden;
+}
+
+.skip-ease-input-container > input {
+	height: 30px;
+	text-align: center;
+	width: 80px;
+	font-size: 12px;
+	padding: 0px 10px;
+	border: 1px solid #4A4A4A;
+	background: transparent;
+	color: white;
+	outline: none;
+}
+ 
+.skip-ease-input-container .skip-ease-add-button {
+	height: 30px;
+	width: 30px;
+	padding: 6px;
+	background: transparent;
+	border: 1px solid #4A4A4A;
+	cursor: pointer;
+}
+
+.skip-ease-input-container > .skip-ease-add-button:hover {
+	border: 1px solid #8A8A8A;
+	background: #181818;
+}
+
+.skip-ease-entry {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 30px;
+	background: transparent;
+	border: 1px solid #4A4A4A;
+	width: fit-content;
+}
+
+.skip-ease-entry .skip-ease-entry-timestamps {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: max-content;
+	height: 30px;
+	color: white;
+	font-size: 12px;
+	padding: 0px 10px;
+	border-right: 1px solid #4A4A4A;
+}
+
+.skip-ease-entry .skip-ease-entry-delete {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 30px;
+	width: 30px;
+}
+
+.skip-ease-entry .skip-ease-entry-delete > img {
+	width: 15px;
+	height: 15px;
+}
+
+.skip-ease-entry .skip-ease-entry-delete:hover {
+	background: red;
+	cursor: pointer;
+}
