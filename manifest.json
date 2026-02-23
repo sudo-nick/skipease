@@ -1,7 +1,7 @@
 {
     "name": "Skip Ease",
     "description": "Skips parts of a youtube video automatically.",
-    "version": "0.2",
+    "version": "0.3",
     "manifest_version": 3,
 	"icons": {
 		"16": "assets/skip-ease.png",
